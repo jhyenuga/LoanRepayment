@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMI Loan Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>EMI Loan Calculator</h1>
+        
+        <div class="calculator-section">
+            <div class="input-group">
+                <label for="principal">Loan Amount (Principal)</label>
+                <input type="number" id="principal" placeholder="Enter loan amount" value="7000000">
+                <span class="currency">₹</span>
+            </div>
+
+            <div class="input-group">
+                <label for="interestRate">Interest Rate (% per annum)</label>
+                <input type="number" id="interestRate" step="0.1" placeholder="Enter interest rate" value="7.1">
+                <span class="percentage">%</span>
+            </div>
+
+            <div class="input-group">
+                <label>Loan Tenure</label>
+                <div class="tenure-toggle">
+                    <button id="yearsBtn" class="toggle-btn">Years</button>
+                    <button id="monthsBtn" class="toggle-btn active">Months</button>
+                </div>
+                <input type="number" id="tenure" placeholder="Enter tenure" value="161">
+                <span id="tenureLabel" class="unit-label">Months</span>
+            </div>
+
+            <div class="prepayment-section">
+                <h3>Prepayment Options</h3>
+                
+                <div class="prepayment-toggle">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="enablePrepayment">
+                        <span>Enable Prepayment</span>
+                    </label>
+                </div>
+
+                <div id="prepaymentInputs" class="prepayment-inputs" style="display: none;">
+                    <div class="input-group">
+                        <label for="prepaymentAmount">Prepayment Amount</label>
+                        <input type="number" id="prepaymentAmount" placeholder="Enter prepayment amount" value="50000">
+                        <span class="currency">₹</span>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="prepaymentMonth">Prepay After (Months)</label>
+                        <input type="number" id="prepaymentMonth" placeholder="Prepay after months" value="12">
+                        <span class="unit-label">Months</span>
+                    </div>
+                </div>
+            </div>
+
+            <button id="calculateBtn" class="calculate-btn">Calculate EMI</button>
+            <button id="resetBtn" class="reset-btn">Reset</button>
+        </div>
+
+        <div class="results-section" id="resultsSection" style="display: none;">
+            <h2>EMI Calculation Results</h2>
+            
+            <div class="result-card">
+                <div class="result-item highlight">
+                    <span class="result-label">Monthly EMI</span>
+                    <span class="result-value" id="emiAmount">₹0</span>
+                </div>
+            </div>
+
+            <div class="result-grid">
+                <div class="result-item">
+                    <span class="result-label">Principal Amount</span>
+                    <span class="result-value" id="totalPrincipal">₹0</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Total Interest</span>
+                    <span class="result-value" id="totalInterest">₹0</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Total Amount Payable</span>
+                    <span class="result-value" id="totalAmount">₹0</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Loan Tenure</span>
+                    <span class="result-value" id="loanTenure">0 months</span>
+                </div>
+            </div>
+
+            <div id="prepaymentResults" class="prepayment-results" style="display: none;">
+                <h3>With Prepayment</h3>
+                <div class="result-grid">
+                    <div class="result-item">
+                        <span class="result-label">New Principal Amount</span>
+                        <span class="result-value" id="newPrincipal">₹0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">New Total Interest</span>
+                        <span class="result-value" id="newInterest">₹0</span>
+                    </div>
+                    <div class="result-item success">
+                        <span class="result-label">Interest Saved</span>
+                        <span class="result-value" id="interestSaved">₹0</span>
+                    </div>
+                    <div class="result-item success">
+                        <span class="result-label">Time Saved</span>
+                        <span class="result-value" id="timeSaved">0 months</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Total Prepayment</span>
+                        <span class="result-value" id="totalPrepayment">₹0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">New Total Payable</span>
+                        <span class="result-value" id="newTotalAmount">₹0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="emiChart"></canvas>
+            </div>
+
+            <div class="amortization-section">
+                <h3>EMI Amortization Schedule</h3>
+                <div class="table-controls">
+                    <button id="showScheduleBtn" class="show-schedule-btn">Show Payment Schedule</button>
+                </div>
+                <div id="scheduleTableContainer" class="schedule-table-container" style="display: none;">
+                    <div class="table-wrapper">
+                        <table id="amortizationTable" class="amortization-table">
+                            <thead>
+                                <tr>
+                                    <th>Month</th>
+                                    <th>EMI Payment</th>
+                                    <th>Principal</th>
+                                    <th>Interest</th>
+                                    <th>Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scheduleTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
