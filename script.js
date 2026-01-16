@@ -19,11 +19,17 @@ const resultsSection = document.getElementById('resultsSection');
 const showScheduleBtn = document.getElementById('showScheduleBtn');
 const scheduleTableContainer = document.getElementById('scheduleTableContainer');
 const scheduleTableBody = document.getElementById('scheduleTableBody');
+const prepaymentTypeRadios = document.querySelectorAll('input[name="prepaymentType"]');
+const recurringOptions = document.getElementById('recurringOptions');
+const prepaymentFrequencySelect = document.getElementById('prepaymentFrequency');
 
 // Event Listeners
 yearsBtn.addEventListener('click', () => toggleTenureUnit('years'));
 monthsBtn.addEventListener('click', () => toggleTenureUnit('months'));
 enablePrepaymentCheckbox.addEventListener('change', togglePrepayment);
+prepaymentTypeRadios.forEach(radio => {
+    radio.addEventListener('change', togglePrepaymentType);
+});
 calculateBtn.addEventListener('click', calculateEMI);
 resetBtn.addEventListener('click', resetCalculator);
 showScheduleBtn.addEventListener('click', toggleSchedule);
@@ -49,6 +55,16 @@ function togglePrepayment() {
         prepaymentInputs.style.display = 'block';
     } else {
         prepaymentInputs.style.display = 'none';
+    }
+}
+
+// Toggle prepayment type
+function togglePrepaymentType() {
+    const selectedType = document.querySelector('input[name="prepaymentType"]:checked').value;
+    if (selectedType === 'recurring') {
+        recurringOptions.style.display = 'block';
+    } else {
+        recurringOptions.style.display = 'none';
     }
 }
 
@@ -124,7 +140,9 @@ function generateAmortizationSchedule(principal, monthlyRate, emi, totalMonths) 
     let balance = principal;
     const prepaymentEnabled = enablePrepaymentCheckbox.checked;
     const prepaymentAmount = prepaymentEnabled ? parseFloat(prepaymentAmountInput.value) || 0 : 0;
-    const prepaymentMonth = prepaymentEnabled ? parseInt(prepaymentMonthInput.value) || 0 : 0;
+    const prepaymentStartMonth = prepaymentEnabled ? parseInt(prepaymentMonthInput.value) || 0 : 0;
+    const prepaymentType = prepaymentEnabled ? document.querySelector('input[name="prepaymentType"]:checked').value : 'onetime';
+    const prepaymentFrequency = prepaymentType === 'recurring' ? parseInt(prepaymentFrequencySelect.value) : 0;
     
     let month = 0;
     
@@ -143,9 +161,19 @@ function generateAmortizationSchedule(principal, monthlyRate, emi, totalMonths) 
         let isPrepaymentMonth = false;
         
         // Check for prepayment
-        if (prepaymentEnabled && month === prepaymentMonth && prepaymentAmount > 0) {
-            prepaymentThisMonth = Math.min(prepaymentAmount, balance - principalPayment);
-            isPrepaymentMonth = true;
+        if (prepaymentEnabled && prepaymentAmount > 0) {
+            if (prepaymentType === 'onetime') {
+                if (month === prepaymentStartMonth) {
+                    prepaymentThisMonth = Math.min(prepaymentAmount, balance - principalPayment);
+                    isPrepaymentMonth = true;
+                }
+            } else {
+                // Recurring prepayment
+                if (month >= prepaymentStartMonth && (month - prepaymentStartMonth) % prepaymentFrequency === 0) {
+                    prepaymentThisMonth = Math.min(prepaymentAmount, balance - principalPayment);
+                    isPrepaymentMonth = true;
+                }
+            }
         }
         
         balance -= (principalPayment + prepaymentThisMonth);
@@ -189,7 +217,9 @@ function displayResults(emi, principal, totalInterest, totalAmount, tenure) {
 // Calculate with prepayment
 function calculateWithPrepayment(principal, monthlyRate, originalEMI, originalTenure) {
     const prepaymentAmount = parseFloat(prepaymentAmountInput.value) || 0;
-    const prepaymentMonth = parseInt(prepaymentMonthInput.value) || 12;
+    const prepaymentStartMonth = parseInt(prepaymentMonthInput.value) || 12;
+    const prepaymentType = document.querySelector('input[name="prepaymentType"]:checked').value;
+    const prepaymentFrequency = prepaymentType === 'recurring' ? parseInt(prepaymentFrequencySelect.value) : 0;
 
     if (prepaymentAmount <= 0) {
         alert('Please enter a valid prepayment amount');
@@ -200,6 +230,7 @@ function calculateWithPrepayment(principal, monthlyRate, originalEMI, originalTe
     let month = 0;
     let totalInterestWithPrepayment = 0;
     let totalPrepaymentMade = 0;
+    let prepaymentCount = 0;
 
     // Simulate loan with prepayment
     while (balance > 0 && month < originalTenure * 2) { // Safety limit
@@ -212,11 +243,22 @@ function calculateWithPrepayment(principal, monthlyRate, originalEMI, originalTe
         // Calculate principal payment
         let principalPayment = originalEMI - interest;
         
-        // Apply one-time prepayment
+        // Apply prepayment
         let prepaymentThisMonth = 0;
-        if (month === prepaymentMonth) {
-            prepaymentThisMonth = Math.min(prepaymentAmount, balance - principalPayment);
-            totalPrepaymentMade += prepaymentThisMonth;
+        if (prepaymentType === 'onetime') {
+            // One-time prepayment
+            if (month === prepaymentStartMonth) {
+                prepaymentThisMonth = Math.min(prepaymentAmount, balance - principalPayment);
+                totalPrepaymentMade += prepaymentThisMonth;
+                prepaymentCount++;
+            }
+        } else {
+            // Recurring prepayment
+            if (month >= prepaymentStartMonth && (month - prepaymentStartMonth) % prepaymentFrequency === 0) {
+                prepaymentThisMonth = Math.min(prepaymentAmount, balance - principalPayment);
+                totalPrepaymentMade += prepaymentThisMonth;
+                prepaymentCount++;
+            }
         }
 
         // Update balance
@@ -238,6 +280,9 @@ function calculateWithPrepayment(principal, monthlyRate, originalEMI, originalTe
     document.getElementById('newInterest').textContent = `₹${formatNumber(totalInterestWithPrepayment.toFixed(2))}`;
     document.getElementById('interestSaved').textContent = `₹${formatNumber(interestSaved.toFixed(2))}`;
     document.getElementById('timeSaved').textContent = `${timeSaved} months (${(timeSaved / 12).toFixed(1)} years)`;
+    
+    const prepaymentLabel = prepaymentType === 'recurring' ? `Total Prepayments (${prepaymentCount}x)` : 'Total Prepayment';
+    document.getElementById('totalPrepaymentLabel').textContent = prepaymentLabel;
     document.getElementById('totalPrepayment').textContent = `₹${formatNumber(totalPrepaymentMade.toFixed(2))}`;
     document.getElementById('newTotalAmount').textContent = `₹${formatNumber(newTotalAmount.toFixed(2))}`;
     document.getElementById('prepaymentResults').style.display = 'block';

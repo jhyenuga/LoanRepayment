@@ -44,6 +44,17 @@
                 </div>
 
                 <div id="prepaymentInputs" class="prepayment-inputs" style="display: none;">
+                    <div class="prepayment-type">
+                        <label class="radio-label">
+                            <input type="radio" name="prepaymentType" value="onetime" checked>
+                            <span>One-Time Prepayment</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="prepaymentType" value="recurring">
+                            <span>Recurring Prepayment</span>
+                        </label>
+                    </div>
+
                     <div class="input-group">
                         <label for="prepaymentAmount">Prepayment Amount</label>
                         <input type="number" id="prepaymentAmount" placeholder="Enter prepayment amount" value="50000">
@@ -51,9 +62,21 @@
                     </div>
 
                     <div class="input-group">
-                        <label for="prepaymentMonth">Prepay After (Months)</label>
-                        <input type="number" id="prepaymentMonth" placeholder="Prepay after months" value="12">
+                        <label for="prepaymentMonth">Start After (Months)</label>
+                        <input type="number" id="prepaymentMonth" placeholder="Start after months" value="12">
                         <span class="unit-label">Months</span>
+                    </div>
+
+                    <div id="recurringOptions" class="recurring-options" style="display: none;">
+                        <div class="input-group">
+                            <label for="prepaymentFrequency">Prepayment Frequency</label>
+                            <select id="prepaymentFrequency">
+                                <option value="1">Every Month</option>
+                                <option value="3">Every 3 Months (Quarterly)</option>
+                                <option value="6" selected>Every 6 Months (Half-Yearly)</option>
+                                <option value="12">Every 12 Months (Yearly)</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -111,7 +134,7 @@
                         <span class="result-value" id="timeSaved">0 months</span>
                     </div>
                     <div class="result-item">
-                        <span class="result-label">Total Prepayment</span>
+                        <span class="result-label" id="totalPrepaymentLabel">Total Prepayment</span>
                         <span class="result-value" id="totalPrepayment">₹0</span>
                     </div>
                     <div class="result-item">
