@@ -144,8 +144,67 @@
                 </div>
             </div>
 
-            <div class="chart-container">
-                <canvas id="emiChart"></canvas>
+            <div class="charts-wrapper">
+                <div class="chart-container">
+                    <h4>Without Prepayment</h4>
+                    <canvas id="emiChartBefore"></canvas>
+                    <div class="chart-breakdown" id="breakdownBefore">
+                        <div class="breakdown-item">
+                            <span class="breakdown-color" style="background: #4f46e5;"></span>
+                            <span class="breakdown-label">Principal</span>
+                            <span class="breakdown-value" id="breakdownPrincipalBefore">₹0</span>
+                            <span class="breakdown-percent" id="breakdownPrincipalPercentBefore">0%</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span class="breakdown-color" style="background: #ef4444;"></span>
+                            <span class="breakdown-label">Interest</span>
+                            <span class="breakdown-value" id="breakdownInterestBefore">₹0</span>
+                            <span class="breakdown-percent" id="breakdownInterestPercentBefore">0%</span>
+                        </div>
+                        <div class="breakdown-item total">
+                            <span class="breakdown-color" style="background: transparent;"></span>
+                            <span class="breakdown-label">Total</span>
+                            <span class="breakdown-value" id="breakdownTotalBefore">₹0</span>
+                            <span class="breakdown-percent">100%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-container" id="afterChartContainer" style="display: none;">
+                    <h4>With Prepayment</h4>
+                    <canvas id="emiChartAfter"></canvas>
+                    <div class="chart-breakdown" id="breakdownAfter">
+                        <div class="breakdown-item">
+                            <span class="breakdown-color" style="background: #4f46e5;"></span>
+                            <span class="breakdown-label">Principal</span>
+                            <span class="breakdown-value" id="breakdownPrincipalAfter">₹0</span>
+                            <span class="breakdown-percent" id="breakdownPrincipalPercentAfter">0%</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span class="breakdown-color" style="background: #ef4444;"></span>
+                            <span class="breakdown-label">Interest</span>
+                            <span class="breakdown-value" id="breakdownInterestAfter">₹0</span>
+                            <span class="breakdown-percent" id="breakdownInterestPercentAfter">0%</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span class="breakdown-color" style="background: #10b981;"></span>
+                            <span class="breakdown-label">Prepayment</span>
+                            <span class="breakdown-value" id="breakdownPrepaymentAfter">₹0</span>
+                            <span class="breakdown-percent" id="breakdownPrepaymentPercentAfter">0%</span>
+                        </div>
+                        <div class="breakdown-item total">
+                            <span class="breakdown-color" style="background: transparent;"></span>
+                            <span class="breakdown-label">Total</span>
+                            <span class="breakdown-value" id="breakdownTotalAfter">₹0</span>
+                            <span class="breakdown-percent">100%</span>
+                        </div>
+                        <div class="breakdown-item savings">
+                            <span class="breakdown-color" style="background: #10b981;"></span>
+                            <span class="breakdown-label">You Save</span>
+                            <span class="breakdown-value" id="breakdownSavings">₹0</span>
+                            <span class="breakdown-percent" id="breakdownSavingsPercent">0%</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="amortization-section">

@@ -1,6 +1,7 @@
 // Global variables
 let tenureUnit = 'months';
-let chart = null;
+let chartBefore = null;
+let chartAfter = null;
 
 // DOM Elements
 const principalInput = document.getElementById('principal');
@@ -115,15 +116,16 @@ function calculateEMI() {
     // Display results without prepayment
     displayResults(emi, principal, totalInterest, totalAmount, tenureInMonths);
 
+    // Create chart (without prepayment)
+    createChart(principal, totalInterest);
+
     // Calculate with prepayment if enabled
     if (enablePrepaymentCheckbox.checked) {
         calculateWithPrepayment(principal, monthlyRate, emi, tenureInMonths);
     } else {
         document.getElementById('prepaymentResults').style.display = 'none';
+        document.getElementById('afterChartContainer').style.display = 'none';
     }
-
-    // Create chart
-    createChart(principal, totalInterest);
 
     // Generate amortization schedule
     generateAmortizationSchedule(principal, monthlyRate, emi, tenureInMonths);
@@ -272,7 +274,8 @@ function calculateWithPrepayment(principal, monthlyRate, originalEMI, originalTe
 
     const newTenure = month;
     const newTotalAmount = principal + totalInterestWithPrepayment;
-    const interestSaved = (originalEMI * originalTenure - principal) - totalInterestWithPrepayment;
+    const originalTotalInterest = (originalEMI * originalTenure - principal);
+    const interestSaved = originalTotalInterest - totalInterestWithPrepayment;
     const timeSaved = originalTenure - newTenure;
 
     // Display prepayment results
@@ -286,18 +289,32 @@ function calculateWithPrepayment(principal, monthlyRate, originalEMI, originalTe
     document.getElementById('totalPrepayment').textContent = `₹${formatNumber(totalPrepaymentMade.toFixed(2))}`;
     document.getElementById('newTotalAmount').textContent = `₹${formatNumber(newTotalAmount.toFixed(2))}`;
     document.getElementById('prepaymentResults').style.display = 'block';
+
+    // Create after chart with prepayment data
+    createAfterChart(principal, totalInterestWithPrepayment, totalPrepaymentMade, originalTotalInterest);
 }
 
-// Create chart
+// Create before chart (without prepayment)
 function createChart(principal, totalInterest) {
-    const ctx = document.getElementById('emiChart').getContext('2d');
+    const ctx = document.getElementById('emiChartBefore').getContext('2d');
 
     // Destroy existing chart if any
-    if (chart) {
-        chart.destroy();
+    if (chartBefore) {
+        chartBefore.destroy();
     }
 
-    chart = new Chart(ctx, {
+    // Update breakdown values
+    const total = principal + totalInterest;
+    const principalPercent = ((principal / total) * 100).toFixed(1);
+    const interestPercent = ((totalInterest / total) * 100).toFixed(1);
+    
+    document.getElementById('breakdownPrincipalBefore').textContent = `₹${formatNumber(principal.toFixed(2))}`;
+    document.getElementById('breakdownPrincipalPercentBefore').textContent = `${principalPercent}%`;
+    document.getElementById('breakdownInterestBefore').textContent = `₹${formatNumber(totalInterest.toFixed(2))}`;
+    document.getElementById('breakdownInterestPercentBefore').textContent = `${interestPercent}%`;
+    document.getElementById('breakdownTotalBefore').textContent = `₹${formatNumber(total.toFixed(2))}`;
+
+    chartBefore = new Chart(ctx, {
         type: 'doughnut',
         data: {
             labels: ['Principal Amount', 'Total Interest'],
@@ -353,6 +370,93 @@ function createChart(principal, totalInterest) {
     });
 }
 
+// Create after chart (with prepayment)
+function createAfterChart(principal, totalInterestWithPrepayment, totalPrepayment, originalTotalInterest) {
+    const ctx = document.getElementById('emiChartAfter').getContext('2d');
+
+    // Destroy existing chart if any
+    if (chartAfter) {
+        chartAfter.destroy();
+    }
+
+    // Show after chart container
+    document.getElementById('afterChartContainer').style.display = 'block';
+
+    // Update breakdown values
+    const total = principal + totalInterestWithPrepayment + totalPrepayment;
+    const principalPercent = ((principal / total) * 100).toFixed(1);
+    const interestPercent = ((totalInterestWithPrepayment / total) * 100).toFixed(1);
+    const prepaymentPercent = ((totalPrepayment / total) * 100).toFixed(1);
+    const interestSaved = originalTotalInterest - totalInterestWithPrepayment;
+    const savingsPercent = ((interestSaved / originalTotalInterest) * 100).toFixed(1);
+    
+    document.getElementById('breakdownPrincipalAfter').textContent = `₹${formatNumber(principal.toFixed(2))}`;
+    document.getElementById('breakdownPrincipalPercentAfter').textContent = `${principalPercent}%`;
+    document.getElementById('breakdownInterestAfter').textContent = `₹${formatNumber(totalInterestWithPrepayment.toFixed(2))}`;
+    document.getElementById('breakdownInterestPercentAfter').textContent = `${interestPercent}%`;
+    document.getElementById('breakdownPrepaymentAfter').textContent = `₹${formatNumber(totalPrepayment.toFixed(2))}`;
+    document.getElementById('breakdownPrepaymentPercentAfter').textContent = `${prepaymentPercent}%`;
+    document.getElementById('breakdownTotalAfter').textContent = `₹${formatNumber(total.toFixed(2))}`;
+    document.getElementById('breakdownSavings').textContent = `₹${formatNumber(interestSaved.toFixed(2))}`;
+    document.getElementById('breakdownSavingsPercent').textContent = `${savingsPercent}%`;
+
+    chartAfter = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Principal Amount', 'Total Interest', 'Prepayment'],
+            datasets: [{
+                data: [principal, totalInterestWithPrepayment, totalPrepayment],
+                backgroundColor: [
+                    '#4f46e5',
+                    '#ef4444',
+                    '#10b981'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Loan Breakdown (With Prepayment)',
+                    font: {
+                        size: 18,
+                        weight: 'bold'
+                    },
+                    padding: 20
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            label += '₹' + formatNumber(context.parsed.toFixed(2));
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((context.parsed / total) * 100).toFixed(1);
+                            label += ` (${percentage}%)`;
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
 // Format number with commas
 function formatNumber(num) {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -379,8 +483,13 @@ function resetCalculator() {
     showScheduleBtn.textContent = 'Show Payment Schedule';
     scheduleTableBody.innerHTML = '';
     
-    if (chart) {
-        chart.destroy();
-        chart = null;
+    if (chartBefore) {
+        chartBefore.destroy();
+        chartBefore = null;
     }
+    if (chartAfter) {
+        chartAfter.destroy();
+        chartAfter = null;
+    }
+    document.getElementById('afterChartContainer').style.display = 'none';
 }
